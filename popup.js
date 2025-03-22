@@ -16,6 +16,40 @@ const autoModeCheckbox = document.getElementById("autoMode");
 
 const toggleBoldBtn = document.getElementById("toggleBold");
 
+// --- Restore Stored Values on Load ---
+
+window.onload = () => {
+  chrome.storage.sync.get(["language", "autoMode"], ({ language, autoMode }) => {
+    if (language) languageSelect.value = language;
+    autoModeCheckbox.checked = !!autoMode;
+  });
+
+  // Save selected language when changed
+  languageSelect.addEventListener("change", () => {
+    chrome.storage.sync.set({ language: languageSelect.value });
+  });
+
+  // Set initial display values
+  fontSizeValue.textContent = fontSizeSlider.value + "px";
+  fontSpacingValue.textContent = fontSpacingSlider.value + "px";
+
+  // Loading saved settings
+  chrome.storage.sync.get(["font", "size", "spacing"], (data) => {
+    if (data.font) {
+      fontSelect.value = data.font; // Set the selected font
+    }
+    if (data.size) {
+      fontSizeSlider.value = data.size; // Set the font size slider
+      fontSizeValue.textContent = data.size + "px"; // Update the font size display
+    }
+    if (data.spacing) {
+      fontSpacingSlider.value = data.spacing;
+      fontSpacingValue.textContent = data.spacing + "px";
+    }
+    applyFontChanges();
+  });
+};
+
 // --- Button Actions ---
 simplifyBtn.addEventListener("click", () => {
   sendPrompt("Rewrite the following to be simpler and easier to read:\n\n{{text}}");
@@ -93,38 +127,3 @@ function sendPrompt(promptText) {
     });
   });
 }
-
-// --- Restore Stored Values on Load ---
-
-window.onload = () => {
-  chrome.storage.sync.get(["language", "autoMode"], ({ language, autoMode }) => {
-    if (language) languageSelect.value = language;
-    autoModeCheckbox.checked = !!autoMode;
-  });
-
-  // Save selected language when changed
-  languageSelect.addEventListener("change", () => {
-    chrome.storage.sync.set({ language: languageSelect.value });
-  });
-
-  // Set initial display values
-  fontSizeValue.textContent = fontSizeSlider.value + "px";
-  fontSpacingValue.textContent = fontSpacingSlider.value + "px";
-
-  // Loading saved settings
-  chrome.storage.sync.get(["font", "size", "spacing"], (data) => {
-  if (data.font) {
-    fontSelect.value = data.font; // Set the selected font
-  }
-  if (data.size) {
-    fontSizeSlider.value = data.size; // Set the font size slider
-    fontSizeValue.textContent = data.size + "px"; // Update the font size display
-  }
-  if(data.spacing) {
-    fontSpacingSlider.value = data.spacing;
-    fontSpacingValue.textContent = data.spacing + "px";
-  }
-});
-
-applyFontChanges();
-};
