@@ -16,8 +16,6 @@ const autoModeCheckbox = document.getElementById("autoMode");
 const toggleBoldBtn = document.getElementById("toggleBold");
 
 // --- Button Actions ---
-
-
 let isBold = false;
 toggleBoldBtn.addEventListener("click", () => {
   isBold = !isBold;
@@ -113,4 +111,6 @@ window.onload = () => {
     fontSpacingValue.textContent = data.spacing + "px";
   }
 });
+
+applyFontChanges();
 };
