@@ -125,4 +125,6 @@ window.onload = () => {
     fontSpacingValue.textContent = data.spacing + "px";
   }
 });
+
+applyFontChanges();
 };
