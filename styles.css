@@ -11,3 +11,10 @@ body {
     display: block;
     margin: 10px 0 5px;
   }
+
+  @font-face {
+    font-family: 'OpenDyslexic';
+    src: url('fonts/OpenDyslexic-Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+  }
