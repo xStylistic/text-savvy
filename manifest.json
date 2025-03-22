@@ -17,7 +17,7 @@
     ],
     "web_accessible_resources": [
       {
-        "resources": ["fonts/*.otf"],
+        "resources": ["fonts/*.otf", "fonts/*.ttf"],
         "matches": ["<all_urls>"]
       }
     ]
