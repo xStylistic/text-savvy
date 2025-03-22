@@ -34,7 +34,7 @@ window.onload = () => {
   fontSpacingValue.textContent = fontSpacingSlider.value + "px";
 
   // Loading saved settings
-  chrome.storage.sync.get(["font", "size", "spacing"], (data) => {
+  chrome.storage.sync.get(["font", "size", "spacing", "isBold"], (data) => {
     if (data.font) {
       fontSelect.value = data.font; // Set the selected font
     }
@@ -45,6 +45,11 @@ window.onload = () => {
     if (data.spacing) {
       fontSpacingSlider.value = data.spacing;
       fontSpacingValue.textContent = data.spacing + "px";
+    }
+    if (data.isBold) {
+      isBold = data.isBold;
+      toggleBoldBtn.textContent = isBold ? "unbold" : "bold";
+      applyBoldState();
     }
     applyFontChanges();
   });
@@ -67,15 +72,23 @@ translatePageBtn.addEventListener("click", () => {
 });
 
 let isBold = false;
-toggleBoldBtn.addEventListener("click", () => {
-  isBold = !isBold;
 
+function applyBoldState() {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     chrome.tabs.sendMessage(tabs[0].id, {
       action: "toggleBold",
-      bold: isBold
+      bold: isBold,
     });
   });
+}
+
+
+toggleBoldBtn.addEventListener("click", () => {
+  isBold = !isBold;
+
+  chrome.storage.sync.set({ isBold });
+
+  applyBoldState();
 
   toggleBoldBtn.textContent = isBold ? "unbold" : "bold";
 });
