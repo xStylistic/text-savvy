@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/open-dyslexic-font@1.0.0/css/open-dyslexic.min.css">
+</head>
+<body>
+  <h2>Text Tools</h2>
+
+  <button id="translate">Translate to English</button>
+  <button id="simplify">Simplify for Dyslexia</button>
+  <button id="ocrTranslate">Translate Text from Images</button>
+
+  <hr>
+
+  <label for="fontSelect">Font:</label>
+  <select id="fontSelect">
+    <option value="Arial">Arial</option>
+    <option value="OpenDyslexic">OpenDyslexic</option>
+  </select>
+
+  <label for="fontSizeSlider">Font Size:</label>
+  <input type="range" id="fontSizeSlider" min="12" max="32" value="16">
+  <span id="fontSizeValue">16px</span>
+
+  <hr>
+
+  <label>
+    <input type="checkbox" id="autoMode">
+    Auto-translate/simplify selected text
+  </label>
+
+  <script src="popup.js"></script>
+</body>
+</html>
