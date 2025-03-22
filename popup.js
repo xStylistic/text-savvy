@@ -3,6 +3,7 @@ const dyslexiaBtn = document.getElementById("dyslexia");
 const colourBlindBtn = document.getElementById("colourBlind");
 const translatePageBtn = document.getElementById("translate");
 const simplifyBtn = document.getElementById("simplify");
+const resetBtn = document.getElementById("reset");
 
 const fontSelect = document.getElementById("fontSelect");
 const fontSizeSlider = document.getElementById("fontSizeSlider");
@@ -60,6 +61,14 @@ window.onload = () => {
 // --- Button Actions ---
 simplifyBtn.addEventListener("click", () => {
   sendPrompt("Rewrite the following to be simpler and easier to read:\n\n{{text}}");
+});
+
+resetBtn.addEventListener("click", () => {
+  chrome.tabs.query({ active: true, currentWindow: true}, (tabs) => {
+    chrome.tabs.sendMessage(tabs[0].id, {
+      action: "resetToDefault"
+    })
+  })
 });
 
 translatePageBtn.addEventListener("click", () => {
