@@ -1,7 +1,8 @@
 // Elements
 const dyslexiaBtn = document.getElementById("dyslexia");
 const highContrastBtn = document.getElementById("highContrast");
-const translateBtn = document.getElementById("translate");
+const translatePageBtn = document.getElementById("translate");
+const simplifyBtn = document.getElementById("simplify");
 
 const fontSelect = document.getElementById("fontSelect");
 const fontSizeSlider = document.getElementById("fontSizeSlider");
@@ -17,6 +18,16 @@ const toggleBoldBtn = document.getElementById("toggleBold");
 
 // --- Button Actions ---
 
+translatePageBtn.addEventListener("click", () => {
+  const language = document.getElementById("languageSelect").value;
+
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.tabs.sendMessage(tabs[0].id, {
+      action: "translatePage",
+      language: language
+    });
+  });
+});
 
 let isBold = false;
 toggleBoldBtn.addEventListener("click", () => {

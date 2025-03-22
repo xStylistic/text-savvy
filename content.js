@@ -67,6 +67,41 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           }
         });
       }
+
+      if (request.action === "translatePage") {
+        translateVisibleTextToLanguage(request.language);
+      }
+
+      function translateVisibleTextToLanguage(targetLanguage) {
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+          acceptNode: (node) => {
+            if (!node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+            if (!node.parentElement || node.parentElement.tagName === "SCRIPT") return NodeFilter.FILTER_REJECT;
+            return NodeFilter.FILTER_ACCEPT;
+          }
+        });
+      
+        const nodes = [];
+        let currentNode;
+        while (currentNode = walker.nextNode()) {
+          nodes.push(currentNode);
+        }
+      
+        nodes.forEach(node => {
+          const original = node.nodeValue.trim();
+          const prompt = `Translate the following text to ${targetLanguage}:\n\n${original}`;
+      
+          chrome.runtime.sendMessage({ action: "callCohere", prompt }, (response) => {
+            if (response?.text) {
+              const translated = response.text.trim();
+              const span = document.createElement("span");
+              span.style.backgroundColor = "#ffffcc"; // highlight
+              span.textContent = translated;
+              node.parentNode.replaceChild(span, node);
+            }
+          });
+        });
+      }
   });
   
   // Auto-mode for selected text
