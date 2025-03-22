@@ -17,6 +17,9 @@ const autoModeCheckbox = document.getElementById("autoMode");
 const toggleBoldBtn = document.getElementById("toggleBold");
 
 // --- Button Actions ---
+simplifyBtn.addEventListener("click", () => {
+  sendPrompt("Rewrite the following to be simpler and easier to read:\n\n{{text}}");
+});
 
 translatePageBtn.addEventListener("click", () => {
   const language = document.getElementById("languageSelect").value;
