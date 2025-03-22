@@ -14,5 +14,11 @@
         "matches": ["<all_urls>"],
         "js": ["content.js"]
       }
+    ],
+    "web_accessible_resources": [
+      {
+        "resources": ["fonts/*.otf"],
+        "matches": ["<all_urls>"]
+      }
     ]
   }

@@ -1,3 +1,15 @@
+// Inject fonts
+const style = document.createElement('style');
+style.textContent = `
+  @font-face {
+    font-family: 'OpenDyslexic';
+    src: url('${chrome.runtime.getURL('fonts/OpenDyslexic-Regular.otf')}') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+  }
+`;
+document.head.appendChild(style);
+
 // Apply AI response to selected text
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "modifyPageText") {
@@ -23,6 +35,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       function applyFontToAll(font, size) {
         document.body.style.fontFamily = font;
         document.body.style.fontSize = size + "px";
+        console.log("Font: " + document.body.style.fontFamily);
         
         const allElements = document.querySelectorAll("*:not(script):not(style)");
       
