@@ -96,8 +96,6 @@ function sendPrompt(promptText) {
 
 // --- Restore Stored Values on Load ---
 
-
-
 window.onload = () => {
   chrome.storage.sync.get(["language", "autoMode"], ({ language, autoMode }) => {
     if (language) languageSelect.value = language;
