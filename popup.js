@@ -18,7 +18,9 @@ const toggleBoldBtn = document.getElementById("toggleBold");
 
 // --- Button Actions ---
 simplifyBtn.addEventListener("click", () => {
-  sendPrompt("Rewrite the following to be simpler and easier to read:\n\n{{text}}");
+  sendPrompt(
+    "Rewrite the following to be simpler and easier to read:\n\n{{text}}"
+  );
 });
 
 translatePageBtn.addEventListener("click", () => {
@@ -27,7 +29,7 @@ translatePageBtn.addEventListener("click", () => {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     chrome.tabs.sendMessage(tabs[0].id, {
       action: "translatePage",
-      language: language
+      language: language,
     });
   });
 });
@@ -39,7 +41,7 @@ toggleBoldBtn.addEventListener("click", () => {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     chrome.tabs.sendMessage(tabs[0].id, {
       action: "toggleBold",
-      bold: isBold
+      bold: isBold,
     });
   });
 
@@ -72,16 +74,16 @@ function applyFontChanges() {
       action: "updateFont",
       font,
       size,
-      spacing
+      spacing,
     });
   });
 }
 
 // --- Auto Mode Toggle ---
 
-autoModeCheckbox.addEventListener("change", (e) => {
-  chrome.storage.sync.set({ autoMode: e.target.checked });
-});
+// autoModeCheckbox.addEventListener("change", (e) => {
+//   chrome.storage.sync.set({ autoMode: e.target.checked });
+// });
 
 // --- Send Prompt Helper ---
 
@@ -89,7 +91,7 @@ function sendPrompt(promptText) {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     chrome.tabs.sendMessage(tabs[0].id, {
       action: "modifyPageText",
-      prompt: promptText
+      prompt: promptText,
     });
   });
 }
@@ -97,10 +99,13 @@ function sendPrompt(promptText) {
 // --- Restore Stored Values on Load ---
 
 window.onload = () => {
-  chrome.storage.sync.get(["language", "autoMode"], ({ language, autoMode }) => {
-    if (language) languageSelect.value = language;
-    autoModeCheckbox.checked = !!autoMode;
-  });
+  // chrome.storage.sync.get(
+  //   ["language", "autoMode"],
+  //   ({ language, autoMode }) => {
+  //     if (language) languageSelect.value = language;
+  //     autoModeCheckbox.checked = !!autoMode;
+  //   }
+  // );
 
   // Save selected language when changed
   languageSelect.addEventListener("change", () => {
@@ -113,16 +118,16 @@ window.onload = () => {
 
   // Loading saved settings
   chrome.storage.sync.get(["font", "size", "spacing"], (data) => {
-  if (data.font) {
-    fontSelect.value = data.font; // Set the selected font
-  }
-  if (data.size) {
-    fontSizeSlider.value = data.size; // Set the font size slider
-    fontSizeValue.textContent = data.size + "px"; // Update the font size display
-  }
-  if(data.spacing) {
-    fontSpacingSlider.value = data.spacing;
-    fontSpacingValue.textContent = data.spacing + "px";
-  }
-});
+    if (data.font) {
+      fontSelect.value = data.font; // Set the selected font
+    }
+    if (data.size) {
+      fontSizeSlider.value = data.size; // Set the font size slider
+      fontSizeValue.textContent = data.size + "px"; // Update the font size display
+    }
+    if (data.spacing) {
+      fontSpacingSlider.value = data.spacing;
+      fontSpacingValue.textContent = data.spacing + "px";
+    }
+  });
 };
