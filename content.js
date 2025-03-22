@@ -17,9 +17,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
   
     if (request.action === "updateFont") {
-      document.body.style.fontFamily = request.font;
-      document.body.style.fontSize = request.size + "px";
-    }
+        applyFontToAll(request.font, request.size);
+      }
+      
+      function applyFontToAll(font, size) {
+        document.body.style.fontFamily = font;
+        document.body.style.fontSize = size + "px";
+        
+        const allElements = document.querySelectorAll("*:not(script):not(style)");
+      
+        allElements.forEach(el => {
+          const style = window.getComputedStyle(el);
+          const isVisible = style.display !== "none" && style.visibility !== "hidden";
+          if (isVisible) {
+            el.style.fontFamily = font;
+            el.style.fontSize = size + "px";
+          }
+        });
+      }
   });
   
   // Auto-mode for selected text
