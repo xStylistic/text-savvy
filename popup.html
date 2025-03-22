@@ -7,9 +7,9 @@
 <body>
   <h2>Text Tools</h2>
 
-  <button id="translate">Dyslexia Mode</button>
-  <button id="simplify">Simplify</button>
-  <button id="ocrTranslate">Translate Images</button>
+  <button id="dyslexia">Dyslexia Mode</button>
+  <button id="highContrast">High Contrast Mode</button>
+  <button id="translate">Translate Page</button>
 
   <hr>
 
@@ -32,9 +32,15 @@
     <option value="OpenDyslexic">OpenDyslexic</option>
   </select>
 
+  <button id="toggleBold">Bold Text</button>
+
   <label for="fontSizeSlider">Font Size:</label>
   <input type="range" id="fontSizeSlider" min="12" max="32" value="16">
   <span id="fontSizeValue">16px</span>
+
+  <label for="fontSpacingSlider">Letter Spacing:</label>
+  <input type="range" id="fontSpacingSlider" min="0" max="10" value="1" step="0.5">
+  <span id="fontSpacingValue">1px</span>
 
   <hr>
 

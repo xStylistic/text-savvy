@@ -1,4 +1,3 @@
-// Apply AI response to selected text
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "modifyPageText") {
       const selection = window.getSelection().toString();
@@ -17,13 +16,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
   
     if (request.action === "updateFont") {
-        applyFontToAll(request.font, request.size);
+        applyFontToAll(request.font, request.size, request.spacing);
       }
       
-      function applyFontToAll(font, size) {
+      function applyFontToAll(font, size, spacing) {
         document.body.style.fontFamily = font;
         document.body.style.fontSize = size + "px";
-        
+        document.body.style.letterSpacing = spacing + "px";
+      
         const allElements = document.querySelectorAll("*:not(script):not(style)");
       
         allElements.forEach(el => {
@@ -32,6 +32,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           if (isVisible) {
             el.style.fontFamily = font;
             el.style.fontSize = size + "px";
+            el.style.letterSpacing = spacing + "px";
+          }
+        });
+      }
+
+      if (request.action === "toggleBold") {
+        toggleBoldAll(request.bold);
+      }
+      
+      function toggleBoldAll(applyBold) {
+        const allElements = document.querySelectorAll("*:not(script):not(style)");
+      
+        allElements.forEach(el => {
+          const style = window.getComputedStyle(el);
+          const isVisible = style.display !== "none" && style.visibility !== "hidden";
+          if (isVisible) {
+            el.style.fontWeight = applyBold ? "bold" : "normal";
           }
         });
       }
