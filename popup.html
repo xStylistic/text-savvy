@@ -1,55 +1,63 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="stylesheet" href="style.css">
-  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/open-dyslexic-font@1.0.0/css/open-dyslexic.min.css"> -->
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h2>Text Tools</h2>
+  <div class="container">
+    <h1 class="title">TextSavy</h1>
 
-  <button id="dyslexia">Dyslexia Mode</button>
-  <button id="highContrast">High Contrast Mode</button>
-  <button id="translate">Translate Page</button>
-  <button id="simplify">Simplify</button>
+    <section>
+      <h2><b>accessibility modes</b></h2>
+      <button id="dyslexia" class="btn blue">dyslexia mode</button>
+      <button id="colourBlind" class="btn yellow">colour blind mode</button>
+    </section>
 
-  <hr>
+    <hr>
 
-  <label for="languageSelect">Wanted Language:</label>
-  <select id="languageSelect">
-    <option value="English">English</option>
-    <option value="Spanish">Spanish</option>
-    <option value="French">French</option>
-    <option value="German">German</option>
-    <option value="Chinese">Chinese</option>
-    <option value="Korean">Korean</option>
-    <option value="Japanese">Japanese</option>
-    <option value="Hindi">Hindi</option>
-  </select>
+    <section>
+      <h2><b>translate page to</b></h2>
+      <label for="languageSelect">language:</label>
+      <div class="row">
+        <select id="languageSelect">
+          <option value="English">English</option>
+          <option value="Spanish">Spanish</option>
+          <option value="French">French</option>
+          <option value="Chinese">Chinese</option>
+          <option value="Korean">Korean</option>
+        </select>
+        <button id="translate" class="small-btn">translate</button>
+      </div>
+    </section>
 
-  <label for="fontSelect">Font:</label>
-  <select id="fontSelect">
-    <option value="Arial">Arial</option>
-    <option value="TimesNewRoman">Times New Roman</option>
-    <option value="OpenDyslexic">Open Dyslexic</option>
-    <!-- add more fonts here -->
-  </select>
+    <hr>
 
-  <button id="toggleBold">Bold Text</button>
+    <section>
+      <h2><b>text customization</b></h2>
 
-  <label for="fontSizeSlider">Font Size:</label>
-  <input type="range" id="fontSizeSlider" min="12" max="32" value="16">
-  <span id="fontSizeValue">16px</span>
+      <label for="fontSelect">font:</label>
+      <div class="row">
+        <select id="fontSelect">
+          <option value="Arial">Arial</option>
+          <option value="TimesNewRoman">Times New Roman</option>
+          <option value="OpenDyslexic">Open Dyslexic</option>
+        </select>
+        <button id="toggleBold" class="small-btn">bold</button>
+      </div>
 
-  <label for="fontSpacingSlider">Letter Spacing:</label>
-  <input type="range" id="fontSpacingSlider" min="0" max="10" value="1" step="0.5">
-  <span id="fontSpacingValue">1px</span>
+      <label for="fontSizeSlider">font size: <span id="fontSizeValue">16 px</span></label>
+      <input type="range" id="fontSizeSlider" min="12" max="32" value="16">
 
-  <hr>
+      <label for="fontSpacingSlider">font spacing: <span id="fontSpacingValue">1 px</span></label>
+      <input type="range" id="fontSpacingSlider" min="0" max="10" value="1" step="0.5">
+    </section>
 
-  <label>
-    <input type="checkbox" id="autoMode">
-    Auto-translate/simplify selected text
-  </label>
+    <hr>
+
+    <section>
+      <button id="simplify" class="btn grey">simplify selected text</button>
+    </section>
+  </div>
 
   <script src="popup.js"></script>
 </body>

@@ -1,6 +1,6 @@
 // Elements
 const dyslexiaBtn = document.getElementById("dyslexia");
-const highContrastBtn = document.getElementById("highContrast");
+const colourBlindBtn = document.getElementById("colourBlind");
 const translatePageBtn = document.getElementById("translate");
 const simplifyBtn = document.getElementById("simplify");
 
@@ -43,7 +43,7 @@ toggleBoldBtn.addEventListener("click", () => {
     });
   });
 
-  toggleBoldBtn.textContent = isBold ? "Unbold Text" : "Bold Text";
+  toggleBoldBtn.textContent = isBold ? "unbold" : "bold";
 });
 
 // --- Font + Spacing Sliders ---
@@ -95,8 +95,6 @@ function sendPrompt(promptText) {
 }
 
 // --- Restore Stored Values on Load ---
-
-
 
 window.onload = () => {
   chrome.storage.sync.get(["language", "autoMode"], ({ language, autoMode }) => {
