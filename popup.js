@@ -1,6 +1,6 @@
 // Elements
 const dyslexiaBtn = document.getElementById("dyslexia");
-const highContrastBtn = document.getElementById("highContrast");
+const colourBlindBtn = document.getElementById("colourBlind");
 const translatePageBtn = document.getElementById("translate");
 const simplifyBtn = document.getElementById("simplify");
 
@@ -17,7 +17,6 @@ const autoModeCheckbox = document.getElementById("autoMode");
 const toggleBoldBtn = document.getElementById("toggleBold");
 
 // --- Button Actions ---
-
 translatePageBtn.addEventListener("click", () => {
   const language = document.getElementById("languageSelect").value;
 
@@ -40,7 +39,7 @@ toggleBoldBtn.addEventListener("click", () => {
     });
   });
 
-  toggleBoldBtn.textContent = isBold ? "Unbold Text" : "Bold Text";
+  toggleBoldBtn.textContent = isBold ? "unbold" : "bold";
 });
 
 // --- Font + Spacing Sliders ---
