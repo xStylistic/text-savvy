@@ -51,7 +51,9 @@ window.onload = () => {
       toggleBoldBtn.textContent = isBold ? "unbold" : "bold";
       applyBoldState();
     }
-    applyFontChanges();
+    if(data.font && data.size && data.spacing) {
+      applyFontChanges();
+    }
   });
 };
 
