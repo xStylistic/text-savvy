@@ -1,6 +1,3 @@
-
-
-
 import express, { json } from 'express';
 import fetch from 'node-fetch'; // Install this: npm install node-fetch
 const app = express();
