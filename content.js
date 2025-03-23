@@ -48,15 +48,14 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Variable to track speech synthesis
+
 let speechSynthesisActive = false;
 
 let originalStyles = {};
 run_once = false;
-// Define colorblindModeEnabled in the global scope
 let colorblindModeEnabled = false;
 
-// Helper function to save current selection
+
 function saveSelection() {
   if (window.getSelection) {
     const sel = window.getSelection();
@@ -67,7 +66,7 @@ function saveSelection() {
   return null;
 }
 
-// Helper function to restore selection
+
 function restoreSelection(range) {
   if (range) {
     if (window.getSelection) {
@@ -78,15 +77,15 @@ function restoreSelection(range) {
   }
 }
 
-// Text-to-speech function
+
 function speakText(text) {
-  // Stop any ongoing speech
+
   stopSpeech();
 
-  // Create speech synthesis utterance
+
   const utterance = new SpeechSynthesisUtterance(text);
 
-  // Get saved voice preferences or use defaults
+
   chrome.storage.sync.get(
     ["speechVoice", "speechRate", "speechPitch"],
     (data) => {
@@ -95,7 +94,7 @@ function speakText(text) {
       let rate = data.speechRate || 1;
       let pitch = data.speechPitch || 1;
 
-      // Set voice if specified
+
       if (voiceName) {
         const voices = window.speechSynthesis.getVoices();
         const voice = voices.find((v) => v.name === voiceName);
@@ -104,11 +103,11 @@ function speakText(text) {
         }
       }
 
-      // Set speech rate and pitch
+
       utterance.rate = rate;
       utterance.pitch = pitch;
 
-      // Add event listeners
+
       utterance.onstart = () => {
         speechSynthesisActive = true;
         console.log("Speech started");
@@ -164,7 +163,7 @@ function captureOriginalStyles() {
     }
   });
 
-  // Save HTML state
+
   originalStyles.html = document.documentElement.innerHTML;
 }
 
@@ -173,21 +172,21 @@ if (run_once == false) {
   run_once = true;
 }
 
-// Function to apply colorblind mode
+
 function applyColorblindMode(enabled) {
   colorblindModeEnabled = enabled;
   console.log("Colorblind mode:", enabled ? "enabled" : "disabled");
 
   if (enabled) {
-    // Apply colorblind mode styles
+
     document.body.style.filter = "contrast(105%) saturate(200%)";
   } else {
-    // Remove colorblind mode styles
+
     document.body.style.filter = "none";
   }
 }
 
-// Function to call Cohere API
+
 async function callCohere(prompt) {
   try {
     const res = await fetch("https://api.cohere.ai/v2/generate", {
@@ -210,7 +209,7 @@ async function callCohere(prompt) {
   }
 }
 
-// Apply AI response to selected text
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.table(request);
 
@@ -218,18 +217,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const selection = window.getSelection().toString();
     if (!selection) return;
 
-    // Save the current selection range
+
     const savedRange = saveSelection();
-    const selectedText = selection; // Store the selected text
+    const selectedText = selection;
 
     const prompt = request.prompt.replace("{{text}}", selectedText);
     callCohere(prompt).then((response) => {
       if (!response || !response.text) return;
 
-      // Restore the saved selection range
+
       restoreSelection(savedRange);
 
-      // Now apply the modification
+
       const newText = `<span style="background:rgba(132, 177, 132, 0.03);">${response.text}</span>`;
       const range = window.getSelection().getRangeAt(0);
       range.deleteContents();
@@ -272,10 +271,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === "resetToDefault") {
-    // Stop any ongoing speech
+
     stopSpeech();
 
-    resetToOriginalStyles(); // Revert to original styles
+    resetToOriginalStyles();
   }
 
   function resetToOriginalStyles() {
@@ -300,13 +299,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       }
     });
 
-    // Remove all highlighted spans with any background style
+
     const allSpans = document.querySelectorAll("span[style*='background']");
     allSpans.forEach((span) => {
       span.outerHTML = span.innerHTML;
     });
 
-    // Additional cleanup for colorblind mode
+
     colorblindModeEnabled = false;
     document.body.style.filter = "none";
   }
@@ -332,19 +331,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const selection = window.getSelection().toString().trim();
     if (!selection) return;
 
-    // Save the current selection range
+
     const savedRange = saveSelection();
-    const selectedText = selection; // Store the selected text
+    const selectedText = selection; 
 
     const prompt = `Translate the following text to ${request.language}:\n\n${selectedText}\n\nONLY OUTPUT THE TRANSLATED TEXT`;
 
     callCohere(prompt).then((response) => {
       if (!response || !response.text) return;
 
-      // Restore the saved selection range
+
       restoreSelection(savedRange);
 
-      // Now apply the translation
+
       const newText = `<span style="background: #ffff99;">${response.text}</span>`;
       const range = window.getSelection().getRangeAt(0);
       range.deleteContents();
@@ -356,8 +355,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === "toggleColorblindMode") {
     applyColorblindMode(!colorblindModeEnabled);
-    // Send response back to popup to update button text if needed
+
     sendResponse({ colorblindModeEnabled: colorblindModeEnabled });
-    return true; // Indicate we'll send a response asynchronously
+    return true;
   }
 });
