@@ -1,5 +1,3 @@
-// content.js
-
 // Inject fonts
 const style = document.createElement("style");
 style.textContent = `
