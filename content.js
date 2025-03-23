@@ -15,37 +15,44 @@ style.textContent = `
 document.head.appendChild(style);
 
 let originalStyles = {};
+run_once = false;
 
 function captureOriginalStyles() {
       originalStyles.body = {
         fontFamily: document.body.style.fontFamily,
         fontSize: document.body.style.fontSize,
-        fontSpacing: document.body.style.letterSpacing
+        fontSpacing: document.body.style.letterSpacing,
       };
-    
+
       // Capture the original font family and size of all elements
       originalStyles.elements = [];
       const allElements = document.querySelectorAll("*:not(script):not(style)");
-      allElements.forEach(el => {
+      allElements.forEach((el) => {
       const style = window.getComputedStyle(el);
-      originalStyles.elements.push({
-      element: el,
-      fontFamily: style.fontFamily,
-      fontSize: style.fontSize,
-      fontSpacing: style.letterSpacing
-    });
+      const isVisible = style.display !== "none" && style.visibility !== "hidden";
+      if (isVisible) {
+        originalStyles.elements.push({
+          element: el,
+          fontFamily: style.fontFamily,
+          fontSize: style.fontSize,
+          fontSpacing: style.letterSpacing
+        });
+      }
   });
 }
 
-captureOriginalStyles();
+if(run_once == false) {
+  captureOriginalStyles();
+  run_once = true;
+}
 
 // Function to call Cohere API
 async function callCohere(prompt) {
   try {
-    const res = await fetch("https://api.cohere.ai/v1/generate", {
+    const res = await fetch("https://api.cohere.ai/v2/generate", {
       method: "POST",
       headers: {
-        Authorization: "Bearer <APIKEY>",
+        Authorization: "Bearer 0UZI9rSYCyhwmCnx68oJG7QXO0zyVguij5VA4dKB",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -72,7 +79,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const prompt = request.prompt.replace("{{text}}", selection);
     callCohere(prompt).then((response) => {
       if (!response || !response.text) return;
-      const newText = `<span style="background: #ffff99;">${response.text}</span>`;
+      const newText = response.text;
       const range = window.getSelection().getRangeAt(0);
       range.deleteContents();
       const temp = document.createElement("div");

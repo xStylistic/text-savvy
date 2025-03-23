@@ -59,6 +59,17 @@ window.onload = () => {
 };
 
 // --- Button Actions ---
+dyslexiaBtn.addEventListener("click", () => {
+  fontSelect.value = "OpenDyslexic";
+  fontSizeSlider.value = 15;
+  fontSizeValue.textContent = "15px";
+  fontSpacingSlider.value = 2.5;
+  fontSpacingValue.textContent = "2.5px";
+  idBold = true;
+  applyBoldState();
+  applyFontChanges();
+});
+
 simplifyBtn.addEventListener("click", () => {
   sendPrompt(
     "Rewrite the following to be simpler and easier to read:\n\n{{text}}"
@@ -90,7 +101,7 @@ function applyBoldState() {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     chrome.tabs.sendMessage(tabs[0].id, {
       action: "toggleBold",
-      bold: isBold,,
+      bold: isBold
     });
   });
 }
