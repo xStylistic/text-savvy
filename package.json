@@ -1,6 +1,7 @@
 {
   "type": "module",
   "dependencies": {
+    "@google/generative-ai": "^0.24.0",
     "cohere-ai": "^7.16.0",
     "express": "^4.21.2",
     "node-fetch": "^3.3.2",
