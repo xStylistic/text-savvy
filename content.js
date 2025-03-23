@@ -52,7 +52,7 @@ async function callCohere(prompt) {
     const res = await fetch("https://api.cohere.ai/v2/generate", {
       method: "POST",
       headers: {
-        Authorization: "Bearer 0UZI9rSYCyhwmCnx68oJG7QXO0zyVguij5VA4dKB",
+        Authorization: "Bearer <API_KEY>",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -79,7 +79,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const prompt = request.prompt.replace("{{text}}", selection);
     callCohere(prompt).then((response) => {
       if (!response || !response.text) return;
-      const newText = response.text;
+      const newText = `<span style="background:rgba(132, 177, 132, 0.03);">${response.text}</span>`;
       const range = window.getSelection().getRangeAt(0);
       range.deleteContents();
       const temp = document.createElement("div");
@@ -112,69 +112,72 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       }
     });
   }
-    if (request.action === "modifyPageText") {
-      const selection = window.getSelection().toString();
-      if (!selection) return;
-  
-      const prompt = request.prompt.replace("{{text}}", selection);
-      chrome.runtime.sendMessage({ action: "callCohere", prompt }, (response) => {
-        if (!response || !response.text) return;
-        const newText = `<span style="background: #ffff99;">${response.text}</span>`;
-        const range = window.getSelection().getRangeAt(0);
-        range.deleteContents();
-        const temp = document.createElement("div");
-        temp.innerHTML = newText;
-        range.insertNode(temp.firstChild);
-      });
-    }
+  if (request.action === "modifyPageText") {
+    const selection = window.getSelection().toString();
+    if (!selection) return;
 
-    if (request.action === "resetToDefault") {
-      resetToOriginalStyles(); // Revert to original styles
-    }
+    const prompt = request.prompt.replace("{{text}}", selection);
+    chrome.runtime.sendMessage({ action: "callCohere", prompt }, (response) => {
+      if (!response || !response.text) return;
+      const newText = `<span style="background: #ffff99;">${response.text}</span>`;
+      const range = window.getSelection().getRangeAt(0);
+      range.deleteContents();
+      const temp = document.createElement("div");
+      temp.innerHTML = newText;
+      range.insertNode(temp.firstChild);
+    });
+  }
 
-    function resetToOriginalStyles() {
-      // Restore the original font family and size of the body
-      document.body.style.fontFamily = originalStyles.body.fontFamily;
-      document.body.style.fontSize = originalStyles.body.fontSize;
-      document.body.style.letterSpacing = originalStyles.body.fontSpacing;
-    
-      // Restore the original font family and size of all elements
-      originalStyles.elements.forEach(item => {
-        item.element.style.fontFamily = item.fontFamily;
-        item.element.style.fontSize = item.fontSize;
-        item.element.style.letterSpacing = item.fontSpacing;
-      });
-    
-      // Remove any highlighted text (if applicable)
-      const highlightedSpans = document.querySelectorAll("span[style*='background: #ffff99']");
-      highlightedSpans.forEach(span => {
-        span.outerHTML = span.innerHTML; // Remove the highlight
-      });
-    }
+  if (request.action === "resetToDefault") {
+    resetToOriginalStyles(); // Revert to original styles
+  }
 
-    if (request.action === "updateFont") {
-        applyFontToAll(request.font, request.size, request.spacing);
+  function resetToOriginalStyles() {
+    // Restore the original font family and size of the body
+    document.body.style.fontFamily = originalStyles.body.fontFamily;
+    document.body.style.fontSize = originalStyles.body.fontSize;
+    document.body.style.letterSpacing = originalStyles.body.fontSpacing;
+
+    // Restore the original font family and size of all elements
+    originalStyles.elements.forEach((item) => {
+      item.element.style.fontFamily = item.fontFamily;
+      item.element.style.fontSize = item.fontSize;
+      item.element.style.letterSpacing = item.fontSpacing;
+    });
+
+    // Remove any highlighted text (if applicable)
+    const highlightedSpans = document.querySelectorAll(
+      "span[style*='background: #ffff99']"
+    );
+    highlightedSpans.forEach((span) => {
+      span.outerHTML = span.innerHTML; // Remove the highlight
+    });
+  }
+
+  if (request.action === "updateFont") {
+    applyFontToAll(request.font, request.size, request.spacing);
+  }
+
+  function applyFontToAll(font, size, spacing) {
+    document.body.style.fontFamily = font;
+    document.body.style.fontSize = size + "px";
+    console.log("Font: " + document.body.style.fontFamily);
+
+    document.body.style.letterSpacing = spacing + "px";
+
+    const allElements = document.querySelectorAll("*:not(script):not(style)");
+
+    allElements.forEach((el) => {
+      const style = window.getComputedStyle(el);
+      const isVisible =
+        style.display !== "none" && style.visibility !== "hidden";
+      if (isVisible) {
+        el.style.fontFamily = font;
+        el.style.fontSize = size + "px";
+        el.style.letterSpacing = spacing + "px";
       }
-      
-      function applyFontToAll(font, size, spacing) {
-        document.body.style.fontFamily = font;
-        document.body.style.fontSize = size + "px";
-        console.log("Font: " + document.body.style.fontFamily);
-        
-        document.body.style.letterSpacing = spacing + "px";
-      
-        const allElements = document.querySelectorAll("*:not(script):not(style)");
-      
-        allElements.forEach(el => {
-          const style = window.getComputedStyle(el);
-          const isVisible = style.display !== "none" && style.visibility !== "hidden";
-          if (isVisible) {
-            el.style.fontFamily = font;
-            el.style.fontSize = size + "px";
-            el.style.letterSpacing = spacing + "px";
-          }
-        });
-      }
+    });
+  }
 
   if (request.action === "toggleBold") {
     toggleBoldAll(request.bold);

@@ -20,10 +20,10 @@ app.post('/cohere', async (req, res) => {
   }
   
   try {
-    const response = await fetch('https://api.cohere.ai/v1/generate', {
+    const response = await fetch('https://api.cohere.ai/v2/generate', {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer 3FXxtG0yNS11Gefy0wPobiqAZ16JTXPl8vaEgLLI', // Replace with your actual Cohere API key
+        'Authorization': 'Bearer <API_KEY>', // Replace with your actual Cohere API key
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
