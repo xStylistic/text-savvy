@@ -45,7 +45,7 @@ async function callCohere(prompt) {
     const res = await fetch("https://api.cohere.ai/v1/generate", {
       method: "POST",
       headers: {
-        Authorization: "Bearer DI1dTtqxDllsqxxs9SUz21Et587xiDITTbLNIxDq",
+        Authorization: "Bearer <APIKEY>",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
