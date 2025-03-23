@@ -65,20 +65,15 @@ window.onload = () => {
 // --- Button Actions ---
 
 
-colorBlindBtn.addEventListener('click', () => {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    chrome.tabs.sendMessage(tabs[0].id, { action: 'toggleColorblindMode' });
-  });
-});
+// colorBlindBtn.addEventListener('click', () => {
+//   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+//     chrome.tabs.sendMessage(tabs[0].id, { action: 'toggleColorblindMode' });
+//   });
+// });
 
 // Update button text based on colorblind mode state
 chrome.storage.sync.get(['colorblindModeEnabled'], (result) => {
   const colorblindModeButton = document.getElementById('colorblindMode');
-  if (result.colorblindModeEnabled) {
-    colorblindModeButton.textContent = 'Disable Colorblind Mode';
-  } else {
-    colorblindModeButton.textContent = 'Enable Colorblind Mode';
-  }
 });
 
 // Toggle colorblind mode
@@ -89,6 +84,7 @@ document.getElementById('colorblindMode').addEventListener('click', () => {
       chrome.storage.sync.set({ colorblindModeEnabled: newState }, () => {
         chrome.tabs.sendMessage(tabs[0].id, { action: 'toggleColorblindMode', enabled: newState });
       });
+       colorBlindBtn.textContent = result.colorblindModeEnabled ? "enable colorblind mode" : "disable colorblind mode";
     });
   });
 });
