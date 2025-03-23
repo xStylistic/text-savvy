@@ -20,10 +20,13 @@ const toggleBoldBtn = document.getElementById("toggleBold");
 // --- Restore Stored Values on Load ---
 
 window.onload = () => {
-  chrome.storage.sync.get(["language", "autoMode"], ({ language, autoMode }) => {
-    if (language) languageSelect.value = language;
-    autoModeCheckbox.checked = !!autoMode;
-  });
+  chrome.storage.sync.get(
+    ["language", "autoMode"],
+    ({ language, autoMode }) => {
+      if (language) languageSelect.value = language;
+      autoModeCheckbox.checked = !!autoMode;
+    }
+  );
 
   // Save selected language when changed
   languageSelect.addEventListener("change", () => {
@@ -52,7 +55,7 @@ window.onload = () => {
       toggleBoldBtn.textContent = isBold ? "unbold" : "bold";
       applyBoldState();
     }
-    if(data.font && data.size && data.spacing) {
+    if (data.font && data.size && data.spacing) {
       applyFontChanges();
     }
   });
@@ -61,16 +64,16 @@ window.onload = () => {
 // --- Button Actions ---
 simplifyBtn.addEventListener("click", () => {
   sendPrompt(
-    "Rewrite the following to be simpler and easier to read:\n\n{{text}}"
+    "Rewrite the following to be simpler and easier to read. DO NOT RESPOND WITH ANYTHING ELSE BUT THE SIMPLIFIED TEXT. Here is the text:\n\n{{text}}"
   );
 });
 
 resetBtn.addEventListener("click", () => {
-  chrome.tabs.query({ active: true, currentWindow: true}, (tabs) => {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     chrome.tabs.sendMessage(tabs[0].id, {
-      action: "resetToDefault"
-    })
-  })
+      action: "resetToDefault",
+    });
+  });
 });
 
 translatePageBtn.addEventListener("click", () => {
@@ -90,11 +93,10 @@ function applyBoldState() {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     chrome.tabs.sendMessage(tabs[0].id, {
       action: "toggleBold",
-      bold: isBold,,
+      bold: isBold,
     });
   });
 }
-
 
 toggleBoldBtn.addEventListener("click", () => {
   isBold = !isBold;
@@ -157,13 +159,6 @@ function sendPrompt(promptText) {
 // --- Restore Stored Values on Load ---
 
 window.onload = () => {
-  // chrome.storage.sync.get(
-  //   ["language", "autoMode"],
-  //   ({ language, autoMode }) => {
-  //     if (language) languageSelect.value = language;
-  //     autoModeCheckbox.checked = !!autoMode;
-  //   }
-  // );
 
   // Save selected language when changed
   languageSelect.addEventListener("change", () => {
