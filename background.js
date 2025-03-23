@@ -45,7 +45,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     chrome.tabs.sendMessage(tab.id, {
       action: "modifyPageText",
       prompt:
-        "IMPORTANT FORMATTING INSTRUCTIONS: You must ONLY output the simplified version of the text, with NO additional text, NO explanations, NO introductions like 'Here is the simplified text', and NO comments of any kind. Your entire response must contain ONLY the simplified text.\n\nSimplify this text making it easier to read and understand while preserving all meaning:\n\n{{text}}",
+        "Rewrite the following to be simpler and easier to read. DO NOT RESPOND WITH ANYTHING ELSE BUT THE SIMPLIFIED TEXT. Here is the text you simplify:\n\n{{text}}\n DO NOT REPLY WITH 'Here is your simplified text:'",
     });
   }
   // Handle translation menu items
