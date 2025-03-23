@@ -68,7 +68,8 @@ dyslexiaBtn.addEventListener("click", () => {
   fontSizeValue.textContent = "15px";
   fontSpacingSlider.value = 2.5;
   fontSpacingValue.textContent = "2.5px";
-  idBold = true;
+  isBold = true;
+  toggleBoldBtn.textContent = isBold ? "unbold" : "bold";
   applyBoldState();
   applyFontChanges();
 });
