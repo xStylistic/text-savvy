@@ -11,6 +11,14 @@ style.textContent = `
     font-weight: normal;
     font-style: normal;
   }
+    @font-face {
+    font-family: 'Nunito';
+    src: url('${chrome.runtime.getURL(
+      "fonts/Nunito-Medium.ttf"
+    )}') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
 `;
 document.head.appendChild(style);
 

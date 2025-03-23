@@ -1,8 +1,6 @@
 // Elements
 const dyslexiaBtn = document.getElementById("dyslexia");
 const colorBlindBtn = document.getElementById("colorblindMode");
-const translatePageBtn = document.getElementById("translate");
-const simplifyBtn = document.getElementById("simplify");
 const resetBtn = document.getElementById("reset");
 
 const fontSelect = document.getElementById("fontSelect");
@@ -12,20 +10,14 @@ const fontSizeValue = document.getElementById("fontSizeValue");
 const fontSpacingSlider = document.getElementById("fontSpacingSlider");
 const fontSpacingValue = document.getElementById("fontSpacingValue");
 
-const languageSelect = document.getElementById("languageSelect");
-const autoModeCheckbox = document.getElementById("autoMode");
-
 const toggleBoldBtn = document.getElementById("toggleBold");
 
 // --- Restore Stored Values on Load ---
 
 window.onload = () => {
   chrome.storage.sync.get(
-    ["language", "autoMode", "colorblindModeEnabled"],
-    ({ language, autoMode, colorblindModeEnabled }) => {
-      if (language) languageSelect.value = language;
-      autoModeCheckbox.checked = !!autoMode;
-
+    ["colorblindModeEnabled"],
+    ({ colorblindModeEnabled }) => {
       // Set initial colorblind button text based on stored state
       if (colorblindModeEnabled) {
         colorBlindBtn.textContent = "disable colorblind mode";
@@ -34,11 +26,6 @@ window.onload = () => {
       }
     }
   );
-
-  // Save selected language when changed
-  languageSelect.addEventListener("change", () => {
-    chrome.storage.sync.set({ language: languageSelect.value });
-  });
 
   // Set initial display values
   fontSizeValue.textContent = fontSizeSlider.value + "px";
@@ -113,11 +100,11 @@ dyslexiaBtn.addEventListener("click", () => {
   applyFontChanges();
 });
 
-simplifyBtn.addEventListener("click", () => {
-  sendPrompt(
-    "Rewrite the following to be simpler and easier to read. DO NOT RESPOND WITH ANYTHING ELSE BUT THE SIMPLIFIED TEXT. Here is the text you simplify:\n\n{{text}}\n DO NOT REPLY WITH 'Here is your simplified text:'"
-  );
-});
+
+
+
+
+let isBold = false;
 
 resetBtn.addEventListener("click", () => {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -129,19 +116,6 @@ resetBtn.addEventListener("click", () => {
   toggleBoldBtn.textContent = isBold ? "unbold" : "bold";
   applyBoldState();
 });
-
-translatePageBtn.addEventListener("click", () => {
-  const language = document.getElementById("languageSelect").value;
-
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    chrome.tabs.sendMessage(tabs[0].id, {
-      action: "translatePage",
-      language: language,
-    });
-  });
-});
-
-let isBold = false;
 
 function applyBoldState() {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
