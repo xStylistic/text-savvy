@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="container">
@@ -11,7 +11,7 @@
 
     <section>
       <h2><b>accessibility modes</b></h2>
-      <button id="dyslexia" class="btn blue">dyslexia mode</button>
+      <button id="dyslexia" class="btn purple">dyslexia mode</button>
       <button id="colorblindMode" class="btn yellow">enable colorblind mode</button>
     </section>
 
@@ -19,7 +19,6 @@
 
     <section>
       <h2><b>text customization</b></h2>
-
       <label for="fontSelect">font:</label>
       <div class="row">
         <select id="fontSelect">
@@ -36,6 +35,8 @@
 
       <label for="fontSpacingSlider">font spacing: <span id="fontSpacingValue">1 px</span></label>
       <input type="range" id="fontSpacingSlider" min="0" max="10" value="1" step="0.5">
+
+      <button id="reset" class="btn grey">reset to defaults</button>
     </section>
 
     <hr>
@@ -44,9 +45,9 @@
       <h2><b>text tools</b></h2>
       <div class="row">
         <button id="simplify" class="btn green">simplify text</button>
-        <button id="speak" class="btn blue">speak text</button>
+        <button id="speak" class="btn pink">speak text</button>
       </div>
-      
+
       <label for="languageSelect">translation language:</label>
       <select id="languageSelect">
         <option value="English">English</option>
@@ -60,32 +61,24 @@
         <option value="Portuguese">Portuguese</option>
         <option value="Russian">Russian</option>
       </select>
-      <button id="translate" class="btn purple">translate text</button>
+      <button id="translate" class="btn blue">translate text</button>
     </section>
 
     <hr>
 
     <section>
       <h2><b>speech settings</b></h2>
-      
-      <label for="voiceSelect">voice:</label>
-      <select id="voiceSelect">
-        <option value="">Default Voice</option>
-        <!-- Voice options will be populated with JavaScript -->
-      </select>
-      
-      <label for="speechRateSlider">speech rate: <span id="speechRateValue">1.0</span></label>
+      <label for="speechRateSlider">
+        rate: <span id="speechRateValue">1.0</span>
+      </label>
       <input type="range" id="speechRateSlider" min="0.5" max="2" value="1" step="0.1">
-      
-      <label for="speechPitchSlider">pitch: <span id="speechPitchValue">1.0</span></label>
+
+      <label for="speechPitchSlider">
+        pitch: <span id="speechPitchValue">1.0</span>
+      </label>
       <input type="range" id="speechPitchSlider" min="0.5" max="2" value="1" step="0.1">
     </section>
 
-    <hr>
-
-    <section>
-      <button id="reset" class="btn grey">reset to defaults</button>
-    </section>
   </div>
 
   <script src="popup.js"></script>
