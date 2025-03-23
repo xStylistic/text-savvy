@@ -1,6 +1,6 @@
 // Elements
 const dyslexiaBtn = document.getElementById("dyslexia");
-const colourBlindBtn = document.getElementById("colourBlind");
+const colorBlindBtn = document.getElementById("colorblindMode");
 const translatePageBtn = document.getElementById("translate");
 const simplifyBtn = document.getElementById("simplify");
 const resetBtn = document.getElementById("reset");
@@ -61,7 +61,34 @@ window.onload = () => {
   });
 };
 
+
 // --- Button Actions ---
+
+
+// colorBlindBtn.addEventListener('click', () => {
+//   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+//     chrome.tabs.sendMessage(tabs[0].id, { action: 'toggleColorblindMode' });
+//   });
+// });
+
+// Update button text based on colorblind mode state
+chrome.storage.sync.get(['colorblindModeEnabled'], (result) => {
+  const colorblindModeButton = document.getElementById('colorblindMode');
+});
+
+// Toggle colorblind mode
+document.getElementById('colorblindMode').addEventListener('click', () => {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.storage.sync.get(['colorblindModeEnabled'], (result) => {
+      const newState = !result.colorblindModeEnabled;
+      chrome.storage.sync.set({ colorblindModeEnabled: newState }, () => {
+        chrome.tabs.sendMessage(tabs[0].id, { action: 'toggleColorblindMode', enabled: newState });
+      });
+       colorBlindBtn.textContent = result.colorblindModeEnabled ? "enable colorblind mode" : "disable colorblind mode";
+    });
+  });
+});
+
 dyslexiaBtn.addEventListener("click", () => {
   fontSelect.value = "OpenDyslexic";
   fontSizeSlider.value = 15;
@@ -171,7 +198,6 @@ function sendPrompt(promptText) {
 // --- Restore Stored Values on Load ---
 
 window.onload = () => {
-
   // Save selected language when changed
   languageSelect.addEventListener("change", () => {
     chrome.storage.sync.set({ language: languageSelect.value });

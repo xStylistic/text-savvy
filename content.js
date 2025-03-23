@@ -18,30 +18,30 @@ let originalStyles = {};
 run_once = false;
 
 function captureOriginalStyles() {
-      originalStyles.body = {
-        fontFamily: document.body.style.fontFamily,
-        fontSize: document.body.style.fontSize,
-        fontSpacing: document.body.style.letterSpacing,
-      };
+  originalStyles.body = {
+    fontFamily: document.body.style.fontFamily,
+    fontSize: document.body.style.fontSize,
+    fontSpacing: document.body.style.letterSpacing,
+  };
 
-      // Capture the original font family and size of all elements
-      originalStyles.elements = [];
-      const allElements = document.querySelectorAll("*:not(script):not(style)");
-      allElements.forEach((el) => {
-      const style = window.getComputedStyle(el);
-      const isVisible = style.display !== "none" && style.visibility !== "hidden";
-      if (isVisible) {
-        originalStyles.elements.push({
-          element: el,
-          fontFamily: style.fontFamily,
-          fontSize: style.fontSize,
-          fontSpacing: style.letterSpacing
-        });
-      }
+  // Capture the original font family and size of all elements
+  originalStyles.elements = [];
+  const allElements = document.querySelectorAll("*:not(script):not(style)");
+  allElements.forEach((el) => {
+    const style = window.getComputedStyle(el);
+    const isVisible = style.display !== "none" && style.visibility !== "hidden";
+    if (isVisible) {
+      originalStyles.elements.push({
+        element: el,
+        fontFamily: style.fontFamily,
+        fontSize: style.fontSize,
+        fontSpacing: style.letterSpacing,
+      });
+    }
   });
 }
 
-if(run_once == false) {
+if (run_once == false) {
   captureOriginalStyles();
   run_once = true;
 }
@@ -52,7 +52,7 @@ async function callCohere(prompt) {
     const res = await fetch("https://api.cohere.ai/v2/generate", {
       method: "POST",
       headers: {
-        Authorization: "Bearer <API_KEY>",
+        Authorization: "Bearer <<APIKEY>>",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
