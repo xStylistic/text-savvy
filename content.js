@@ -51,6 +51,21 @@ if (run_once == false) {
   captureOriginalStyles();
   run_once = true;
 }
+let clonedDOM = null;
+run_once2 = false;
+
+// Function to clone the entire page
+function clonePage() {
+  // Create a deep copy of the entire document
+  clonedDOM = document.documentElement.cloneNode(true);
+  console.log("Page cloned:", clonedDOM); // Debugging  
+}
+
+// Clone the page when it loads
+if(run_once2 == false) {
+  clonePage();
+  run_once2 = true;
+}
 
 // Function to call Cohere API
 async function callCohere(prompt) {
@@ -58,7 +73,7 @@ async function callCohere(prompt) {
     const res = await fetch("https://api.cohere.ai/v2/generate", {
       method: "POST",
       headers: {
-        Authorization: "Bearer <<APIKEY>>",
+        Authorization: "Bearer 0UZI9rSYCyhwmCnx68oJG7QXO0zyVguij5VA4dKB",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -146,8 +161,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
   }
 
+  function resetToClonedDOM() {
+    if (clonedDOM) {
+      // Replace the current document's HTML with the cloned DOM
+      document.documentElement.innerHTML = clonedDOM.innerHTML;
+      console.log("Page reset to cloned DOM"); // Debugging
+    } else {
+      console.error("Cloned DOM not found."); // Debugging
+    }
+  }
+
   if (request.action === "resetToDefault") {
     resetToOriginalStyles(); // Revert to original styles
+    resetToClonedDOM();
   }
 
   function resetToOriginalStyles() {
