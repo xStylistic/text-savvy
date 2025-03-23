@@ -22,6 +22,8 @@ function captureOriginalStyles() {
     fontFamily: document.body.style.fontFamily,
     fontSize: document.body.style.fontSize,
     fontSpacing: document.body.style.letterSpacing,
+    fontWeight: document.body.style.fontWeight,
+    filter: document.body.style.filter,
   };
 
   // Capture the original font family and size of all elements
@@ -36,9 +38,13 @@ function captureOriginalStyles() {
         fontFamily: style.fontFamily,
         fontSize: style.fontSize,
         fontSpacing: style.letterSpacing,
+        fontWeight: style.fontWeight,
       });
     }
   });
+
+  // Save HTML state
+  originalStyles.html = document.documentElement.innerHTML;
 }
 
 if (run_once == false) {
@@ -72,18 +78,21 @@ async function callCohere(prompt) {
 // Call Gemini API
 async function callGemini(prompt) {
   try {
-    const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?", {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer AIzaSyAgepd3bYBxrCkhDzXRjI5uyAhwOhtIFWI",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "command",
-        prompt: prompt,
-        temperature: 0.7,
-      }),
-    });
+    const res = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?",
+      {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer AIzaSyAgepd3bYBxrCkhDzXRjI5uyAhwOhtIFWI",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "command",
+          prompt: prompt,
+          temperature: 0.7,
+        }),
+      }
+    );
     const data = await res.json();
     return { text: data.generations[0].text.trim() };
   } catch (error) {
@@ -136,25 +145,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       }
     });
   }
-  if (request.action === "modifyPageText") {
-    const selection = window.getSelection().toString();
-    if (!selection) return;
-
-    const prompt = request.prompt.replace("{{text}}", selection);
-    chrome.runtime.sendMessage({ action: "callCohere", prompt }, (response) => {
-      if (!response || !response.text) return;
-      const newText = `<span style="background: #ffff99;">${response.text}</span>`;
-      const range = window.getSelection().getRangeAt(0);
-      range.deleteContents();
-      const temp = document.createElement("div");
-      temp.innerHTML = newText;
-      range.insertNode(temp.firstChild);
-    });
-  }
 
   if (request.action === "resetToDefault") {
     resetToOriginalStyles(); // Revert to original styles
-    
   }
 
   function resetToOriginalStyles() {
@@ -162,46 +155,31 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     document.body.style.fontFamily = originalStyles.body.fontFamily;
     document.body.style.fontSize = originalStyles.body.fontSize;
     document.body.style.letterSpacing = originalStyles.body.fontSpacing;
+    document.body.style.fontWeight = originalStyles.body.fontWeight;
+    document.body.style.filter = originalStyles.body.filter;
 
     // Restore the original font family and size of all elements
     originalStyles.elements.forEach((item) => {
-      item.element.style.fontFamily = item.fontFamily;
-      item.element.style.fontSize = item.fontSize;
-      item.element.style.letterSpacing = item.fontSpacing;
-    });
-
-    // Remove any highlighted text 
-    const highlightedSpans = document.querySelectorAll(
-      "span[style*='background: #ffff99']"
-    );
-    highlightedSpans.forEach((span) => {
-      span.outerHTML = span.innerHTML; 
-    });
-  }
-
-  if (request.action === "updateFont") {
-    applyFontToAll(request.font, request.size, request.spacing);
-  }
-
-  function applyFontToAll(font, size, spacing) {
-    document.body.style.fontFamily = font;
-    document.body.style.fontSize = size + "px";
-    console.log("Font: " + document.body.style.fontFamily);
-
-    document.body.style.letterSpacing = spacing + "px";
-
-    const allElements = document.querySelectorAll("*:not(script):not(style)");
-
-    allElements.forEach((el) => {
-      const style = window.getComputedStyle(el);
-      const isVisible =
-        style.display !== "none" && style.visibility !== "hidden";
-      if (isVisible) {
-        el.style.fontFamily = font;
-        el.style.fontSize = size + "px";
-        el.style.letterSpacing = spacing + "px";
+      try {
+        if (item.element && item.element.style) {
+          item.element.style.fontFamily = item.fontFamily;
+          item.element.style.fontSize = item.fontSize;
+          item.element.style.letterSpacing = item.fontSpacing;
+          item.element.style.fontWeight = item.fontWeight;
+        }
+      } catch (e) {
+        console.log("Error resetting element:", e);
       }
     });
+
+    // Remove all highlighted spans with any background style
+    const allSpans = document.querySelectorAll("span[style*='background']");
+    allSpans.forEach((span) => {
+      span.outerHTML = span.innerHTML;
+    });
+
+    // Additional cleanup for colorblind mode
+    colorblindModeEnabled = false;
   }
 
   if (request.action === "toggleBold") {
@@ -225,7 +203,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const selection = window.getSelection().toString().trim();
     if (!selection) return;
     const prompt = `Translate the following text to ${request.language}:\n\n${selection}\n\nONLY OUTPUT THE TRANSLATED TEXT`;
-    
+
     callCohere(prompt).then((response) => {
       if (!response || !response.text) return;
       const newText = `<span style="background: #ffff99;">${response.text}</span>`;
@@ -238,28 +216,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   let colorblindModeEnabled = false;
- 
- chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-   if (request.action === 'toggleColorblindMode') {
-     colorblindModeEnabled = !colorblindModeEnabled;
-     applyColorblindMode(colorblindModeEnabled);
-   }
- });
- 
- function applyColorblindMode(enabled) {
-   if (enabled) {
-     // Apply colorblind mode styles
-     document.body.style.filter = 'contrast(105%) saturate(200%)';
-   } else {
-     // Remove colorblind mode styles
-     document.body.style.filter = 'none';
-   }
- }
- 
- chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-   if (request.action === 'toggleColorblindMode') {
-     applyColorblindMode(request.enabled);
-   }
- });
 
-},);
+  function applyColorblindMode(enabled) {
+    colorblindModeEnabled = enabled;
+    if (enabled) {
+      // Apply colorblind mode styles
+      document.body.style.filter = "contrast(105%) saturate(200%)";
+    } else {
+      // Remove colorblind mode styles
+      document.body.style.filter = "none";
+    }
+  }
+
+  if (request.action === "toggleColorblindMode") {
+    applyColorblindMode(!colorblindModeEnabled);
+  }
+});

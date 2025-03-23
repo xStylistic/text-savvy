@@ -2,9 +2,12 @@
     "manifest_version": 3,
     "name": "TextSavy - AI Text Tool",
     "version": "1.0",
-    "permissions": ["scripting", "activeTab", "storage"],
+    "permissions": ["contextMenus", "scripting", "activeTab", "storage"],
     "action": {
       "default_popup": "popup.html"
+    },
+    "background": {
+      "service_worker": "background.js"
     },
     "content_scripts": [
       {
