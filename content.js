@@ -236,4 +236,29 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
   }
 
+  let colorblindModeEnabled = false;
+ 
+ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+   if (request.action === 'toggleColorblindMode') {
+     colorblindModeEnabled = !colorblindModeEnabled;
+     applyColorblindMode(colorblindModeEnabled);
+   }
+ });
+ 
+ function applyColorblindMode(enabled) {
+   if (enabled) {
+     // Apply colorblind mode styles
+     document.body.style.filter = 'contrast(105%) saturate(200%)';
+   } else {
+     // Remove colorblind mode styles
+     document.body.style.filter = 'none';
+   }
+ }
+ 
+ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+   if (request.action === 'toggleColorblindMode') {
+     applyColorblindMode(request.enabled);
+   }
+ });
+
 },);
