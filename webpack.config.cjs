@@ -4,7 +4,6 @@ module.exports = {
   // Entry points for your scripts
   entry: {
     content: './content.js', // Your content script
-    background: './cohere.js', // Your background script (if needed)
   },
   // Output configuration
   output: {
