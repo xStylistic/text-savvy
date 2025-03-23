@@ -113,6 +113,9 @@ resetBtn.addEventListener("click", () => {
       action: "resetToDefault",
     });
   });
+  isBold = false;
+  toggleBoldBtn.textContent = isBold ? "unbold" : "bold";
+  applyBoldState();
 });
 
 translatePageBtn.addEventListener("click", () => {

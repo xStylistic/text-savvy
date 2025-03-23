@@ -154,6 +154,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === "resetToDefault") {
     resetToOriginalStyles(); // Revert to original styles
+    
   }
 
   function resetToOriginalStyles() {
