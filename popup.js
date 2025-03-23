@@ -21,10 +21,17 @@ const toggleBoldBtn = document.getElementById("toggleBold");
 
 window.onload = () => {
   chrome.storage.sync.get(
-    ["language", "autoMode"],
-    ({ language, autoMode }) => {
+    ["language", "autoMode", "colorblindModeEnabled"],
+    ({ language, autoMode, colorblindModeEnabled }) => {
       if (language) languageSelect.value = language;
       autoModeCheckbox.checked = !!autoMode;
+
+      // Set initial colorblind button text based on stored state
+      if (colorblindModeEnabled) {
+        colorBlindBtn.textContent = "disable colorblind mode";
+      } else {
+        colorBlindBtn.textContent = "enable colorblind mode";
+      }
     }
   );
 
@@ -63,31 +70,33 @@ window.onload = () => {
 
 // --- Button Actions ---
 
-// colorBlindBtn.addEventListener('click', () => {
-//   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-//     chrome.tabs.sendMessage(tabs[0].id, { action: 'toggleColorblindMode' });
-//   });
-// });
-
-// Update button text based on colorblind mode state
-chrome.storage.sync.get(["colorblindModeEnabled"], (result) => {
-  const colorblindModeButton = document.getElementById("colorblindMode");
-});
-
 // Toggle colorblind mode
-document.getElementById("colorblindMode").addEventListener("click", () => {
+colorBlindBtn.addEventListener("click", () => {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     chrome.storage.sync.get(["colorblindModeEnabled"], (result) => {
-      const newState = !result.colorblindModeEnabled;
+      // Get current state, default to false if not set
+      const currentState = result.colorblindModeEnabled || false;
+      // Toggle to the opposite state
+      const newState = !currentState;
+
+      // Update storage
       chrome.storage.sync.set({ colorblindModeEnabled: newState }, () => {
-        chrome.tabs.sendMessage(tabs[0].id, {
-          action: "toggleColorblindMode",
-          enabled: newState,
-        });
+        // Send message to content script
+        chrome.tabs.sendMessage(
+          tabs[0].id,
+          {
+            action: "toggleColorblindMode",
+          },
+          (response) => {
+            // Update button text based on the new state
+            if (response && response.colorblindModeEnabled !== undefined) {
+              colorBlindBtn.textContent = response.colorblindModeEnabled
+                ? "disable colorblind mode"
+                : "enable colorblind mode";
+            }
+          }
+        );
       });
-      colorBlindBtn.textContent = result.colorblindModeEnabled
-        ? "enable colorblind mode"
-        : "disable colorblind mode";
     });
   });
 });

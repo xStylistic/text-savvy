@@ -16,6 +16,30 @@ document.head.appendChild(style);
 
 let originalStyles = {};
 run_once = false;
+// Define colorblindModeEnabled in the global scope
+let colorblindModeEnabled = false;
+
+// Helper function to save current selection
+function saveSelection() {
+  if (window.getSelection) {
+    const sel = window.getSelection();
+    if (sel.getRangeAt && sel.rangeCount) {
+      return sel.getRangeAt(0);
+    }
+  }
+  return null;
+}
+
+// Helper function to restore selection
+function restoreSelection(range) {
+  if (range) {
+    if (window.getSelection) {
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  }
+}
 
 function captureOriginalStyles() {
   originalStyles.body = {
@@ -52,13 +76,27 @@ if (run_once == false) {
   run_once = true;
 }
 
+// Function to apply colorblind mode
+function applyColorblindMode(enabled) {
+  colorblindModeEnabled = enabled;
+  console.log("Colorblind mode:", enabled ? "enabled" : "disabled");
+
+  if (enabled) {
+    // Apply colorblind mode styles
+    document.body.style.filter = "contrast(105%) saturate(200%)";
+  } else {
+    // Remove colorblind mode styles
+    document.body.style.filter = "none";
+  }
+}
+
 // Function to call Cohere API
 async function callCohere(prompt) {
   try {
     const res = await fetch("https://api.cohere.ai/v2/generate", {
       method: "POST",
       headers: {
-        Authorization: "Bearer <<APIKEY>>",
+        Authorization: "Bearer 0UZI9rSYCyhwmCnx68oJG7QXO0zyVguij5VA4dKB",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -109,9 +147,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const selection = window.getSelection().toString();
     if (!selection) return;
 
-    const prompt = request.prompt.replace("{{text}}", selection);
+    // Save the current selection range
+    const savedRange = saveSelection();
+    const selectedText = selection; // Store the selected text
+
+    const prompt = request.prompt.replace("{{text}}", selectedText);
     callCohere(prompt).then((response) => {
       if (!response || !response.text) return;
+
+      // Restore the saved selection range
+      restoreSelection(savedRange);
+
+      // Now apply the modification
       const newText = `<span style="background:rgba(132, 177, 132, 0.03);">${response.text}</span>`;
       const range = window.getSelection().getRangeAt(0);
       range.deleteContents();
@@ -180,6 +227,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     // Additional cleanup for colorblind mode
     colorblindModeEnabled = false;
+    document.body.style.filter = "none";
   }
 
   if (request.action === "toggleBold") {
@@ -202,10 +250,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "translatePage") {
     const selection = window.getSelection().toString().trim();
     if (!selection) return;
-    const prompt = `Translate the following text to ${request.language}:\n\n${selection}\n\nONLY OUTPUT THE TRANSLATED TEXT`;
+
+    // Save the current selection range
+    const savedRange = saveSelection();
+    const selectedText = selection; // Store the selected text
+
+    const prompt = `Translate the following text to ${request.language}:\n\n${selectedText}\n\nONLY OUTPUT THE TRANSLATED TEXT`;
 
     callCohere(prompt).then((response) => {
       if (!response || !response.text) return;
+
+      // Restore the saved selection range
+      restoreSelection(savedRange);
+
+      // Now apply the translation
       const newText = `<span style="background: #ffff99;">${response.text}</span>`;
       const range = window.getSelection().getRangeAt(0);
       range.deleteContents();
@@ -215,20 +273,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
   }
 
-  let colorblindModeEnabled = false;
-
-  function applyColorblindMode(enabled) {
-    colorblindModeEnabled = enabled;
-    if (enabled) {
-      // Apply colorblind mode styles
-      document.body.style.filter = "contrast(105%) saturate(200%)";
-    } else {
-      // Remove colorblind mode styles
-      document.body.style.filter = "none";
-    }
-  }
-
   if (request.action === "toggleColorblindMode") {
     applyColorblindMode(!colorblindModeEnabled);
+    // Send response back to popup to update button text if needed
+    sendResponse({ colorblindModeEnabled: colorblindModeEnabled });
+    return true; // Indicate we'll send a response asynchronously
   }
 });
