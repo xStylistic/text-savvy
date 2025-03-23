@@ -68,14 +68,15 @@ dyslexiaBtn.addEventListener("click", () => {
   fontSizeValue.textContent = "15px";
   fontSpacingSlider.value = 2.5;
   fontSpacingValue.textContent = "2.5px";
-  idBold = true;
+  isBold = true;
+  toggleBoldBtn.textContent = isBold ? "unbold" : "bold";
   applyBoldState();
   applyFontChanges();
 });
 
 simplifyBtn.addEventListener("click", () => {
   sendPrompt(
-    "Rewrite the following to be simpler and easier to read. DO NOT RESPOND WITH ANYTHING ELSE BUT THE SIMPLIFIED TEXT. Here is the text:\n\n{{text}}"
+    "Rewrite the following to be simpler and easier to read. DO NOT RESPOND WITH ANYTHING ELSE BUT THE SIMPLIFIED TEXT. Here is the text you simplify:\n\n{{text}}\n DO NOT REPLY WITH 'Here is your simplified text:'"
   );
 });
 

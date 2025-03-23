@@ -69,9 +69,33 @@ async function callCohere(prompt) {
   }
 }
 
+// Call Gemini API
+async function callGemini(prompt) {
+  try {
+    const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer AIzaSyAgepd3bYBxrCkhDzXRjI5uyAhwOhtIFWI",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "command",
+        prompt: prompt,
+        temperature: 0.7,
+      }),
+    });
+    const data = await res.json();
+    return { text: data.generations[0].text.trim() };
+  } catch (error) {
+    console.error("Gemini API error:", error);
+    return { error: error.message };
+  }
+}
+
 // Apply AI response to selected text
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.table(request);
+
   if (request.action === "modifyPageText") {
     const selection = window.getSelection().toString();
     if (!selection) return;
@@ -145,12 +169,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       item.element.style.letterSpacing = item.fontSpacing;
     });
 
-    // Remove any highlighted text (if applicable)
+    // Remove any highlighted text 
     const highlightedSpans = document.querySelectorAll(
       "span[style*='background: #ffff99']"
     );
     highlightedSpans.forEach((span) => {
-      span.outerHTML = span.innerHTML; // Remove the highlight
+      span.outerHTML = span.innerHTML; 
     });
   }
 
@@ -197,64 +221,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === "translatePage") {
-    translateVisibleTextToLanguage(request.language);
-  }
-
-  function translateVisibleTextToLanguage(targetLanguage) {
-    const walker = document.createTreeWalker(
-      document.body,
-      NodeFilter.SHOW_TEXT,
-      {
-        acceptNode: (node) => {
-          if (!node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
-          if (!node.parentElement || node.parentElement.tagName === "SCRIPT")
-            return NodeFilter.FILTER_REJECT;
-          return NodeFilter.FILTER_ACCEPT;
-        },
-      }
-    );
-
-    const nodes = [];
-    let currentNode;
-    while ((currentNode = walker.nextNode())) {
-      nodes.push(currentNode);
-    }
-
-    nodes.forEach((node) => {
-      const original = node.nodeValue.trim();
-      const prompt = `Translate the following text to ${targetLanguage}:\n\n${original}`;
-
-      callCohere(prompt).then((response) => {
-        if (response?.text) {
-          const translated = response.text.trim();
-          const span = document.createElement("span");
-          span.style.backgroundColor = "#ffffcc"; // highlight
-          span.textContent = translated;
-          node.parentNode.replaceChild(span, node);
-        }
-      });
+    const selection = window.getSelection().toString().trim();
+    if (!selection) return;
+    const prompt = `Translate the following text to ${request.language}:\n\n${selection}\n\nONLY OUTPUT THE TRANSLATED TEXT`;
+    
+    callCohere(prompt).then((response) => {
+      if (!response || !response.text) return;
+      const newText = `<span style="background: #ffff99;">${response.text}</span>`;
+      const range = window.getSelection().getRangeAt(0);
+      range.deleteContents();
+      const temp = document.createElement("div");
+      temp.innerHTML = newText;
+      range.insertNode(temp.firstChild);
     });
   }
-});
 
-// Auto-mode for selected text
-chrome.storage.sync.get("autoMode", ({ autoMode }) => {
-  if (autoMode) {
-    document.addEventListener("mouseup", () => {
-      const selected = window.getSelection().toString().trim();
-      if (selected.length > 0) {
-        const prompt =
-          "Simplify and translate the following into English:\n\n" + selected;
-        callCohere(prompt).then((response) => {
-          if (!response || !response.text) return;
-          const newText = `<span style="background: #ffff99;">${response.text}</span>`;
-          const range = window.getSelection().getRangeAt(0);
-          range.deleteContents();
-          const temp = document.createElement("div");
-          temp.innerHTML = newText;
-          range.insertNode(temp.firstChild);
-        });
-      }
-    });
-  }
-});
+},);
