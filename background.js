@@ -37,6 +37,13 @@ chrome.runtime.onInstalled.addListener(() => {
       contexts: ["selection"],
     });
   });
+
+  // Create text-to-speech option
+  chrome.contextMenus.create({
+    id: "speakText",
+    title: "Speak Text",
+    contexts: ["selection"],
+  });
 });
 
 // Handle clicks on the context menu items
@@ -70,5 +77,11 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         language: language,
       });
     }
+  }
+  // Handle text-to-speech
+  else if (info.menuItemId === "speakText") {
+    chrome.tabs.sendMessage(tab.id, {
+      action: "speakText",
+    });
   }
 });

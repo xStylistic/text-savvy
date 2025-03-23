@@ -2,6 +2,9 @@
 const dyslexiaBtn = document.getElementById("dyslexia");
 const colorBlindBtn = document.getElementById("colorblindMode");
 const resetBtn = document.getElementById("reset");
+const simplifyBtn = document.getElementById("simplify");
+const translateBtn = document.getElementById("translate");
+const speakBtn = document.getElementById("speak");
 
 const fontSelect = document.getElementById("fontSelect");
 const fontSizeSlider = document.getElementById("fontSizeSlider");
@@ -10,19 +13,67 @@ const fontSizeValue = document.getElementById("fontSizeValue");
 const fontSpacingSlider = document.getElementById("fontSpacingSlider");
 const fontSpacingValue = document.getElementById("fontSpacingValue");
 
+const languageSelect = document.getElementById("languageSelect");
 const toggleBoldBtn = document.getElementById("toggleBold");
+
+// Speech synthesis controls
+const voiceSelect = document.getElementById("voiceSelect");
+const speechRateSlider = document.getElementById("speechRateSlider");
+const speechRateValue = document.getElementById("speechRateValue");
+const speechPitchSlider = document.getElementById("speechPitchSlider");
+const speechPitchValue = document.getElementById("speechPitchValue");
 
 // --- Restore Stored Values on Load ---
 
 window.onload = () => {
+  // Load speech synthesis voices
+  populateVoiceOptions();
+
   chrome.storage.sync.get(
-    ["colorblindModeEnabled"],
-    ({ colorblindModeEnabled }) => {
+    [
+      "colorblindModeEnabled",
+      "language",
+      "speechVoice",
+      "speechRate",
+      "speechPitch",
+    ],
+    ({
+      colorblindModeEnabled,
+      language,
+      speechVoice,
+      speechRate,
+      speechPitch,
+    }) => {
       // Set initial colorblind button text based on stored state
       if (colorblindModeEnabled) {
         colorBlindBtn.textContent = "disable colorblind mode";
       } else {
         colorBlindBtn.textContent = "enable colorblind mode";
+      }
+
+      // Set language if available
+      if (language && languageSelect) {
+        languageSelect.value = language;
+      }
+
+      // Set speech settings if available
+      if (speechRate && speechRateSlider && speechRateValue) {
+        speechRateSlider.value = speechRate;
+        speechRateValue.textContent = speechRate.toFixed(1);
+      }
+
+      if (speechPitch && speechPitchSlider && speechPitchValue) {
+        speechPitchSlider.value = speechPitch;
+        speechPitchValue.textContent = speechPitch.toFixed(1);
+      }
+
+      if (speechVoice && voiceSelect) {
+        // This will be handled by populateVoiceOptions
+        setTimeout(() => {
+          if (voiceSelect.querySelector(`option[value="${speechVoice}"]`)) {
+            voiceSelect.value = speechVoice;
+          }
+        }, 100);
       }
     }
   );
@@ -54,6 +105,47 @@ window.onload = () => {
     }
   });
 };
+
+// Function to populate voice options
+function populateVoiceOptions() {
+  if (!voiceSelect) return;
+
+  // Clear existing options except the default
+  while (voiceSelect.options.length > 1) {
+    voiceSelect.remove(1);
+  }
+
+  // Get available voices
+  let voices = speechSynthesis.getVoices();
+
+  // If voices aren't available yet, wait for the voiceschanged event
+  if (voices.length === 0) {
+    speechSynthesis.onvoiceschanged = () => {
+      voices = speechSynthesis.getVoices();
+      populateVoiceList(voices);
+    };
+  } else {
+    populateVoiceList(voices);
+  }
+}
+
+function populateVoiceList(voices) {
+  // Load saved voice setting
+  chrome.storage.sync.get(["speechVoice"], ({ speechVoice }) => {
+    // Add each voice as an option
+    voices.forEach((voice) => {
+      const option = document.createElement("option");
+      option.textContent = `${voice.name} (${voice.lang})`;
+      option.value = voice.name;
+      voiceSelect.appendChild(option);
+
+      // Select previously saved voice if available
+      if (speechVoice && voice.name === speechVoice) {
+        option.selected = true;
+      }
+    });
+  });
+}
 
 // --- Button Actions ---
 
@@ -88,6 +180,67 @@ colorBlindBtn.addEventListener("click", () => {
   });
 });
 
+// Speak selected text
+if (speakBtn) {
+  speakBtn.addEventListener("click", () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.tabs.sendMessage(tabs[0].id, {
+        action: "speakText",
+      });
+    });
+  });
+}
+
+// Simplify text
+if (simplifyBtn) {
+  simplifyBtn.addEventListener("click", () => {
+    sendPrompt(
+      "IMPORTANT FORMATTING INSTRUCTIONS: You must ONLY output the simplified version of the text, with NO additional text, NO explanations, NO introductions like 'Here is the simplified text', and NO comments of any kind. Your entire response must contain ONLY the simplified text.\n\nSimplify this text making it easier to read and understand while preserving all meaning:\n\n{{text}}"
+    );
+  });
+}
+
+// Translate text
+if (translateBtn && languageSelect) {
+  translateBtn.addEventListener("click", () => {
+    const language = languageSelect.value;
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.tabs.sendMessage(tabs[0].id, {
+        action: "translatePage",
+        language: language,
+      });
+    });
+  });
+
+  // Save selected language when changed
+  languageSelect.addEventListener("change", () => {
+    chrome.storage.sync.set({ language: languageSelect.value });
+  });
+}
+
+// Voice settings
+if (voiceSelect) {
+  voiceSelect.addEventListener("change", () => {
+    chrome.storage.sync.set({ speechVoice: voiceSelect.value });
+  });
+}
+
+if (speechRateSlider && speechRateValue) {
+  speechRateSlider.addEventListener("input", () => {
+    const rate = parseFloat(speechRateSlider.value);
+    speechRateValue.textContent = rate.toFixed(1);
+    chrome.storage.sync.set({ speechRate: rate });
+  });
+}
+
+if (speechPitchSlider && speechPitchValue) {
+  speechPitchSlider.addEventListener("input", () => {
+    const pitch = parseFloat(speechPitchSlider.value);
+    speechPitchValue.textContent = pitch.toFixed(1);
+    chrome.storage.sync.set({ speechPitch: pitch });
+  });
+}
+
 dyslexiaBtn.addEventListener("click", () => {
   fontSelect.value = "OpenDyslexic";
   fontSizeSlider.value = 15;
@@ -99,10 +252,6 @@ dyslexiaBtn.addEventListener("click", () => {
   applyBoldState();
   applyFontChanges();
 });
-
-
-
-
 
 let isBold = false;
 

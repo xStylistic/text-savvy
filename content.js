@@ -22,6 +22,9 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
+// Variable to track speech synthesis
+let speechSynthesisActive = false;
+
 let originalStyles = {};
 run_once = false;
 // Define colorblindModeEnabled in the global scope
@@ -46,6 +49,66 @@ function restoreSelection(range) {
       sel.removeAllRanges();
       sel.addRange(range);
     }
+  }
+}
+
+// Text-to-speech function
+function speakText(text) {
+  // Stop any ongoing speech
+  stopSpeech();
+
+  // Create speech synthesis utterance
+  const utterance = new SpeechSynthesisUtterance(text);
+
+  // Get saved voice preferences or use defaults
+  chrome.storage.sync.get(
+    ["speechVoice", "speechRate", "speechPitch"],
+    (data) => {
+      // Set default values if not found
+      let voiceName = data.speechVoice || "";
+      let rate = data.speechRate || 1;
+      let pitch = data.speechPitch || 1;
+
+      // Set voice if specified
+      if (voiceName) {
+        const voices = window.speechSynthesis.getVoices();
+        const voice = voices.find((v) => v.name === voiceName);
+        if (voice) {
+          utterance.voice = voice;
+        }
+      }
+
+      // Set speech rate and pitch
+      utterance.rate = rate;
+      utterance.pitch = pitch;
+
+      // Add event listeners
+      utterance.onstart = () => {
+        speechSynthesisActive = true;
+        console.log("Speech started");
+      };
+
+      utterance.onend = () => {
+        speechSynthesisActive = false;
+        console.log("Speech ended");
+      };
+
+      utterance.onerror = (event) => {
+        speechSynthesisActive = false;
+        console.error("Speech error:", event);
+      };
+
+      // Speak the text
+      window.speechSynthesis.speak(utterance);
+    }
+  );
+}
+
+// Stop ongoing speech
+function stopSpeech() {
+  if (speechSynthesisActive) {
+    window.speechSynthesis.cancel();
+    speechSynthesisActive = false;
   }
 }
 
@@ -104,11 +167,11 @@ async function callCohere(prompt) {
     const res = await fetch("https://api.cohere.ai/v2/generate", {
       method: "POST",
       headers: {
-        Authorization: "Bearer 0UZI9rSYCyhwmCnx68oJG7QXO0zyVguij5VA4dKB",
+        Authorization: "Bearer xiGs4S1Cm2Nlcq4JHPhieiP6MQPViYt4fjlu2bjv",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "command",
+        model: "command-r-plus",
         prompt: prompt,
         temperature: 0.7,
       }),
@@ -117,32 +180,6 @@ async function callCohere(prompt) {
     return { text: data.generations[0].text.trim() };
   } catch (error) {
     console.error("Cohere API error:", error);
-    return { error: error.message };
-  }
-}
-
-// Call Gemini API
-async function callGemini(prompt) {
-  try {
-    const res = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?",
-      {
-        method: "POST",
-        headers: {
-          Authorization: "Bearer AIzaSyAgepd3bYBxrCkhDzXRjI5uyAhwOhtIFWI",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "command",
-          prompt: prompt,
-          temperature: 0.7,
-        }),
-      }
-    );
-    const data = await res.json();
-    return { text: data.generations[0].text.trim() };
-  } catch (error) {
-    console.error("Gemini API error:", error);
     return { error: error.message };
   }
 }
@@ -180,6 +217,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     applyFontToAll(request.font, request.size, request.spacing);
   }
 
+  if (request.action === "speakText") {
+    const selection = window.getSelection().toString().trim();
+    if (selection) {
+      speakText(selection);
+    }
+  }
+
   function applyFontToAll(font, size, spacing) {
     document.body.style.fontFamily = font;
     document.body.style.fontSize = size + "px";
@@ -202,6 +246,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === "resetToDefault") {
+    // Stop any ongoing speech
+    stopSpeech();
+
     resetToOriginalStyles(); // Revert to original styles
   }
 
