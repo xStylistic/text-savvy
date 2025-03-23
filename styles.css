@@ -121,8 +121,15 @@ body {
   }
 
   @font-face {
-    font-family: 'OpenDyslexic';
-    src: url('fonts/OpenDyslexic-Regular.otf') format('opentype');
+    font-family: 'Boldonse';
+    src: url('fonts/Boldonse-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: 'ComicSans';
+    src: url('fonts/ComicSansMS.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
   }
@@ -130,6 +137,27 @@ body {
   @font-face {
     font-family: 'Nunito';
     src: url('fonts/Nunito-Medium.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: 'OpenDyslexic';
+    src: url('fonts/OpenDyslexic-Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: 'Roboto';
+    src: url('fonts/Roboto-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: 'SourGummy';
+    src: url('fonts/SourGummy-Regular.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
   }

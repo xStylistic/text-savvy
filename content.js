@@ -4,6 +4,26 @@
 const style = document.createElement("style");
 style.textContent = `
   @font-face {
+    font-family: 'Boldonse';
+    src: url('${chrome.runtime.getURL("fonts/Boldonse-Regular.ttf")}') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: 'ComicSans';
+    src: url('${chrome.runtime.getURL("fonts/ComicSansMS.ttf")}') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: 'Nunito';
+    src: url('${chrome.runtime.getURL(
+      "fonts/Nunito-Medium.ttf"
+    )}') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+  @font-face {
     font-family: 'OpenDyslexic';
     src: url('${chrome.runtime.getURL(
       "fonts/OpenDyslexic-Regular.otf"
@@ -11,11 +31,17 @@ style.textContent = `
     font-weight: normal;
     font-style: normal;
   }
-    @font-face {
-    font-family: 'Nunito';
+  @font-face {
+    font-family: 'Roboto';
     src: url('${chrome.runtime.getURL(
-      "fonts/Nunito-Medium.ttf"
+      "fonts/Roboto-Regular.ttf"
     )}') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: 'SourGummy';
+    src: url('${chrome.runtime.getURL("fonts/SourGummy-Regular.ttf")}') format('truetype');
     font-weight: normal;
     font-style: normal;
   }
