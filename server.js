@@ -1,52 +1,66 @@
-import express, { json } from 'express';
-import fetch from 'node-fetch'; // Install this: npm install node-fetch
+const express = require('express');
+const cors = require('cors');
+const fetch = require('node-fetch');
+require('dotenv').config();
+
 const app = express();
-const port = process.env.PORT || 8000;
+app.use(cors());
+app.use(express.json());
 
-// Use built-in middleware to parse JSON
-app.use(json());
+const COHERE_API_KEY = process.env.COHERE_API_KEY;
 
+// Health check endpoint for Render
 app.get('/', (req, res) => {
-  res.send("Hello from Express proxy!");
+  res.json({ status: 'ok', message: 'TextSavy API is running' });
 });
 
-app.post('/cohere', async (req, res) => {
-  const { prompt } = req.body;
-  if (!prompt) {
-    return res.status(400).json({ error: 'No prompt provided' });
-  }
-  
+app.post('/api/translate', async (req, res) => {
   try {
-    const response = await fetch('https://api.cohere.ai/v2/generate', {
-      method: 'POST',
+    const { text, language } = req.body;
+    const response = await fetch("https://api.cohere.ai/v2/generate", {
+      method: "POST",
       headers: {
-        'Authorization': 'Bearer <API_KEY>', // Replace with your actual Cohere API key
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${COHERE_API_KEY}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: 'command',
-        prompt: prompt,
+        model: "command-r-plus",
+        prompt: `Translate the following text to ${language}:\n\n${text}\n\nONLY OUTPUT THE TRANSLATED TEXT`,
         temperature: 0.7,
-        max_tokens: 100
-      })
+      }),
     });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      return res.status(response.status).json({ error: `Cohere API error: ${errorText}` });
-    }
-    
     const data = await response.json();
-    const text = data.generations && data.generations[0] && data.generations[0].text
-      ? data.generations[0].text.trim()
-      : "";
-    res.json({ text });
+    res.json({ text: data.generations[0].text.trim() });
   } catch (error) {
-    console.error('Error calling Cohere API:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error('Translation error:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
-app.listen(port, () => {
-  console.log(`Express server running on port ${port}`);
+app.post('/api/modify', async (req, res) => {
+  try {
+    const { text, prompt } = req.body;
+    const response = await fetch("https://api.cohere.ai/v2/generate", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${COHERE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "command-r-plus",
+        prompt: prompt.replace("{{text}}", text),
+        temperature: 0.7,
+      }),
+    });
+    const data = await response.json();
+    res.json({ text: data.generations[0].text.trim() });
+  } catch (error) {
+    console.error('Modification error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

@@ -187,22 +187,20 @@ function applyColorblindMode(enabled) {
 
 async function callCohere(prompt) {
   try {
-    const res = await fetch("https://api.cohere.ai/v2/generate", {
+    const res = await fetch("https://your-backend-service.com/api/modify", {
       method: "POST",
       headers: {
-        Authorization: "Bearer xiGs4S1Cm2Nlcq4JHPhieiP6MQPViYt4fjlu2bjv",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "command-r-plus",
-        prompt: prompt,
-        temperature: 0.7,
+        text: prompt,
+        prompt: prompt
       }),
     });
     const data = await res.json();
-    return { text: data.generations[0].text.trim() };
+    return { text: data.text };
   } catch (error) {
-    console.error("Cohere API error:", error);
+    console.error("API error:", error);
     return { error: error.message };
   }
 }
@@ -215,7 +213,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const selection = window.getSelection().toString();
     if (!selection) return;
 
-
     const savedRange = saveSelection();
     const selectedText = selection;
 
@@ -223,9 +220,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     callCohere(prompt).then((response) => {
       if (!response || !response.text) return;
 
-
       restoreSelection(savedRange);
-
 
       const newText = `<span style="background:rgba(132, 177, 132, 0.03);">${response.text}</span>`;
       const range = window.getSelection().getRangeAt(0);
@@ -326,29 +321,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === "translatePage") {
-    const selection = window.getSelection().toString().trim();
-    if (!selection) return;
-
-
-    const savedRange = saveSelection();
-    const selectedText = selection; 
-
-    const prompt = `Translate the following text to ${request.language}:\n\n${selectedText}\n\nONLY OUTPUT THE TRANSLATED TEXT`;
-
-    callCohere(prompt).then((response) => {
-      if (!response || !response.text) return;
-
-
-      restoreSelection(savedRange);
-
-
-      const newText = `<span style="background: #ffff99;">${response.text}</span>`;
-      const range = window.getSelection().getRangeAt(0);
-      range.deleteContents();
-      const temp = document.createElement("div");
-      temp.innerHTML = newText;
-      range.insertNode(temp.firstChild);
-    });
+    handleTranslatePage(request.language);
   }
 
   if (request.action === "toggleColorblindMode") {
@@ -358,3 +331,37 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
 });
+
+async function handleTranslatePage(language) {
+  const selection = window.getSelection().toString().trim();
+  if (!selection) return;
+
+  const savedRange = saveSelection();
+  const selectedText = selection;
+
+  try {
+    const res = await fetch("https://your-backend-service.com/api/translate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text: selectedText,
+        language: language
+      }),
+    });
+    const data = await res.json();
+    
+    if (!data || !data.text) return;
+
+    restoreSelection(savedRange);
+    const newText = `<span style="background: #ffff99;">${data.text}</span>`;
+    const range = window.getSelection().getRangeAt(0);
+    range.deleteContents();
+    const temp = document.createElement("div");
+    temp.innerHTML = newText;
+    range.insertNode(temp.firstChild);
+  } catch (error) {
+    console.error("Translation error:", error);
+  }
+}
