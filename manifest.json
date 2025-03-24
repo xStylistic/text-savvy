@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "TextSavy - AI Text Tool",
+    "name": "TextSavvy - Web browsing made easy for all",
     "version": "1.0",
     "permissions": ["contextMenus", "scripting", "activeTab", "storage"],
     "action": {
