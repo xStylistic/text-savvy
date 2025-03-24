@@ -187,16 +187,22 @@ function applyColorblindMode(enabled) {
 
 async function callCohere(prompt) {
   try {
-    const res = await fetch("https://your-backend-service.com/api/modify", {
+    const res = await fetch("http://localhost:10000/api/modify", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Accept": "application/json"
       },
+      mode: "cors",
+      credentials: "omit",
       body: JSON.stringify({
         text: prompt,
         prompt: prompt
       }),
     });
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
     const data = await res.json();
     return { text: data.text };
   } catch (error) {
@@ -340,16 +346,22 @@ async function handleTranslatePage(language) {
   const selectedText = selection;
 
   try {
-    const res = await fetch("https://your-backend-service.com/api/translate", {
+    const res = await fetch("http://localhost:10000/api/translate", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Accept": "application/json"
       },
+      mode: "cors",
+      credentials: "omit",
       body: JSON.stringify({
         text: selectedText,
         language: language
       }),
     });
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
     const data = await res.json();
     
     if (!data || !data.text) return;

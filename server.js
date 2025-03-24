@@ -4,7 +4,19 @@ const fetch = require('node-fetch');
 require('dotenv').config();
 
 const app = express();
-app.use(cors());
+
+// Configure CORS with specific options
+app.use(cors({
+  origin: true, // Allow all origins
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  credentials: true
+}));
+
+// Handle preflight requests
+app.options('*', cors());
+
+// Parse JSON bodies
 app.use(express.json());
 
 const COHERE_API_KEY = process.env.COHERE_API_KEY;
@@ -60,7 +72,7 @@ app.post('/api/modify', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = 10000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
