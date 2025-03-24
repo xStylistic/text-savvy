@@ -346,7 +346,7 @@ async function handleTranslatePage(language) {
   const selectedText = selection;
 
   try {
-    const res = await fetch("http://localhost:10000/api/translate", {
+    const res = await fetch("https://textsavvy-backend.onrender.com", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
