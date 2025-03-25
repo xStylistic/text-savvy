@@ -187,7 +187,15 @@ function applyColorblindMode(enabled) {
 
 async function callCohere(prompt) {
   try {
-    const res = await fetch("http://localhost:10000/api/modify", {
+    // Show loading indicator
+    const loadingSpan = document.createElement('span');
+    loadingSpan.textContent = '⌛ Processing...';
+    loadingSpan.style.backgroundColor = '#fff3cd';
+    loadingSpan.style.padding = '2px 5px';
+    loadingSpan.style.borderRadius = '3px';
+    document.body.appendChild(loadingSpan);
+
+    const res = await fetch("https://textsavvy-backend.onrender.com/api/modify", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -200,6 +208,10 @@ async function callCohere(prompt) {
         prompt: prompt
       }),
     });
+    
+    // Remove loading indicator
+    loadingSpan.remove();
+
     if (!res.ok) {
       throw new Error(`HTTP error! status: ${res.status}`);
     }
@@ -207,6 +219,14 @@ async function callCohere(prompt) {
     return { text: data.text };
   } catch (error) {
     console.error("API error:", error);
+    // Show error message to user
+    const errorSpan = document.createElement('span');
+    errorSpan.textContent = '❌ Error: Could not process text. Please try again.';
+    errorSpan.style.backgroundColor = '#f8d7da';
+    errorSpan.style.padding = '2px 5px';
+    errorSpan.style.borderRadius = '3px';
+    document.body.appendChild(errorSpan);
+    setTimeout(() => errorSpan.remove(), 3000);
     return { error: error.message };
   }
 }
@@ -346,7 +366,15 @@ async function handleTranslatePage(language) {
   const selectedText = selection;
 
   try {
-    const res = await fetch("https://textsavvy-backend.onrender.com", {
+    // Show loading indicator
+    const loadingSpan = document.createElement('span');
+    loadingSpan.textContent = `⌛ loading ...`;
+    loadingSpan.style.backgroundColor = '#fff3cd';
+    loadingSpan.style.padding = '2px 5px';
+    loadingSpan.style.borderRadius = '3px';
+    document.body.appendChild(loadingSpan);
+
+    const res = await fetch("https://textsavvy-backend.onrender.com/api/translate", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -359,12 +387,18 @@ async function handleTranslatePage(language) {
         language: language
       }),
     });
+
+    // Remove loading indicator
+    loadingSpan.remove();
+
     if (!res.ok) {
       throw new Error(`HTTP error! status: ${res.status}`);
     }
     const data = await res.json();
     
-    if (!data || !data.text) return;
+    if (!data || !data.text) {
+      throw new Error('No translation received');
+    }
 
     restoreSelection(savedRange);
     const newText = `<span style="background: #ffff99;">${data.text}</span>`;
@@ -375,5 +409,13 @@ async function handleTranslatePage(language) {
     range.insertNode(temp.firstChild);
   } catch (error) {
     console.error("Translation error:", error);
+    // Show error message to user
+    const errorSpan = document.createElement('span');
+    errorSpan.textContent = '❌ Translation failed. Please try again.';
+    errorSpan.style.backgroundColor = '#f8d7da';
+    errorSpan.style.padding = '2px 5px';
+    errorSpan.style.borderRadius = '3px';
+    document.body.appendChild(errorSpan);
+    setTimeout(() => errorSpan.remove(), 3000);
   }
 }
