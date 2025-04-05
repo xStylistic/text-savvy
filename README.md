@@ -11,7 +11,7 @@ npm install
 
 ## Usage
 
-Go to **chrome://extensions/** and make sure you're in developer mode. Click **load unpacked** and select the folder. You can run this extension with your own API key or use our backend server!
+Go to **chrome://extensions/** and make sure you're in developer mode. Click **load unpacked** and select the folder. You can run this extension with your own API key or use our backend server. You should now be able to use the extension :)
 
 ## Contributing
 
