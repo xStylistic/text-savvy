@@ -8,7 +8,7 @@ Clone or fork this repo and then install dependencies.
 ```bash
 npm install
 ```
-If you want to use your on API key, create an .env file like this:
+If you want to use your own API key, create an .env file like this:
 ```
 COHERE_API_KEY=
 PORT=
